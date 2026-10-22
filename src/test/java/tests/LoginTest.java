@@ -26,9 +26,9 @@ public class LoginTest extends BaseTest {
 
     @Test
     public void verifyFlaskApp() {
-        String appUrl = System.getProperty("app.url","http://flask-app-service");
+        //String appUrl = System.getProperty("app.url","http://flask-app-service");
 
-        driver.get(appUrl);
+        driver.get(http://localhost:30081/);
 
         String title = driver.getTitle();
         System.out.println("Page title: " + title);
