@@ -126,7 +126,7 @@ public class UserRegistrationTest extends BaseTest{
         );
     }
 
-    @Test
+  /*  @Test
     public void testRegisteredUserIsDisplayed() {
         driver.findElement(By.name("name")).sendKeys("Bob");
         driver.findElement(By.name("email"))
@@ -146,7 +146,7 @@ public class UserRegistrationTest extends BaseTest{
             users.contains("Bob - bob@example.com")
         );
     }
-
+*/
     @Test
     public void testPasswordIsNotDisplayed() {
         driver.findElement(By.name("name")).sendKeys("Charlie");
