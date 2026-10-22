@@ -8,8 +8,9 @@
 
         <classes>
              
-            <class name="test.java.tests.LoginTest"/> 
-            <!--<class name="test.java.tests.RegistrationTest"/>-->
+            <!--<class name="test.java.tests.LoginTest"/> -->
+            <class name="test.java.tests.RegistrationTest"/>
+            <class name="test.java.tests.UserRegistrationTest"/>
         </classes>
 
     </test>
