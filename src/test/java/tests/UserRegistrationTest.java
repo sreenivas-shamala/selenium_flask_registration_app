@@ -9,7 +9,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class RegistrationTest {
+public class UserRegistrationTest {
 
     WebDriver driver;
     String baseUrl = "http://127.0.0.1:5000";
