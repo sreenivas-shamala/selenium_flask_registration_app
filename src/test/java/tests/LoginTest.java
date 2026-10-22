@@ -32,7 +32,7 @@ public class LoginTest extends BaseTest {
 
         String title = driver.getTitle();
         System.out.println("Page title: " + title);
-        System.out.println("Page Url: " + appUrl);
+        //System.out.println("Page Url: " + appUrl);
 
         String bodyText = driver.findElement(By.tagName("body")).getText();
         System.out.println(bodyText);
