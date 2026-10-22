@@ -22,7 +22,14 @@ public class RegistrationTest {
         options.addArguments("--disable-dev-shm-usage");
 
         driver = new ChromeDriver(options);
-        driver.get(baseUrl);
+        String appUrl = System.getProperty("app.url","http://flask-registration-service");
+
+        driver.get(appUrl);
+
+        String title = driver.getTitle();
+        System.out.println("Page title: " + title);
+        System.out.println("Page Url: " + appUrl);
+       // driver.get(baseUrl);
     }
 
     @AfterMethod(alwaysRun = true)
