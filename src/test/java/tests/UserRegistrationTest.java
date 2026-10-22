@@ -9,7 +9,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class UserRegistrationTest {
+public class UserRegistrationTest extends BaseTest{
 
     
     @Test
