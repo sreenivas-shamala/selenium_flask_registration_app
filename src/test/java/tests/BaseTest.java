@@ -21,6 +21,9 @@ options.addArguments("--disable-dev-shm-usage");
 options.addArguments("--window-size=1920,1080");
 
 driver = new ChromeDriver(options);
+        String appUrl = System.getProperty("app.url","http://flask-registration-service");
+
+        driver.get(appUrl);
     }
 
     @AfterMethod(alwaysRun = true)
