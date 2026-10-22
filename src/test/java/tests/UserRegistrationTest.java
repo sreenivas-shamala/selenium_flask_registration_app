@@ -11,34 +11,7 @@ import org.testng.annotations.Test;
 
 public class UserRegistrationTest {
 
-    WebDriver driver;
-    String baseUrl = "http://127.0.0.1:5000";
-
-    @BeforeMethod
-    public void setUp() {
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-
-        driver = new ChromeDriver(options);
-        String appUrl = System.getProperty("app.url","http://flask-registration-service");
-
-        driver.get(appUrl);
-
-        String title = driver.getTitle();
-        System.out.println("Page title: " + title);
-        System.out.println("Page Url: " + appUrl);
-       // driver.get(baseUrl);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
-    }
-
+    
     @Test
     public void testRegistrationPageLoads() {
         Assert.assertEquals(
