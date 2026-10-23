@@ -16,7 +16,7 @@ public class RegistrationTest extends BaseTest {
 
         String title = driver.getTitle();
         System.out.println("Page title: " + title);
-        System.out.println("Page Url: " + appUrl);
+        //System.out.println("Page Url: " + appUrl);
 
         driver.findElement(By.name("name")).sendKeys("admin");
         driver.findElement(By.name("email")).sendKeys("admin@gmail.com");
