@@ -33,7 +33,7 @@ public class RegistrationTest extends BaseTest {
             ).getText();
 
             Assert.assertTrue(
-                    result.toLowerCase().contains("registration"),
+                    result.toLowerCase().contains("Registration"),
                     "Registration in Paragraph Text was not found"
             );
 
