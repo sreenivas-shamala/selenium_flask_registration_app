@@ -166,6 +166,7 @@ stage('Clean Old Reports') {
             artifacts: 'target/surefire-reports/**/*,test-output/**/*',
             allowEmptyArchive: true
         )
+       } 
         success {
             echo 'Selenium tests passed'
         }
