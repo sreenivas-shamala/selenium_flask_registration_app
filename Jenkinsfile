@@ -1,5 +1,5 @@
-pipeline {
 
+pipeline {
     agent any
 
     tools {
@@ -8,11 +8,10 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                git branch: 'main', url:'https://github.com/sreenivas-shamala/selenium_jenkins_integration.git'
-                
+                git branch: 'main',
+                    url: 'https://github.com/sreenivas-shamala/selenium_jenkins_integration.git'
             }
         }
 
@@ -30,25 +29,39 @@ pipeline {
     }
 
     post {
-
         always {
-
             echo '=== TestNG Report Publishing ==='
 
-        sh '''
-            echo "=== TestNG XML reports ==="
-            find target/surefire-reports -type f -name "*.xml" -print
-        '''
+            sh '''
+                echo "=== Workspace ==="
+                pwd
 
-        testNG(
-            reportFilenamePattern: '**/testng-results.xml',
-            showFailedBuilds: true
-        )
+                echo "=== TestNG XML reports ==="
+                find . -type f -name "testng-results.xml" -print || true
 
-        archiveArtifacts(
-            artifacts: 'target/surefire-reports/**/*,test-output/**/*',
-            allowEmptyArchive: true
-        )
+                echo "=== Surefire XML reports ==="
+                find . -type f -path "*/surefire-reports/*.xml" -print || true
+
+                echo "=== Screenshots ==="
+                find . -type f -name "*.png" -print || true
+            '''
+
+            script {
+                if (fileExists('target/surefire-reports/testng-results.xml')) {
+                    testNG(
+                        reportFilenamePattern:
+                            '**/testng-results.xml',
+                        showFailedBuilds: true
+                    )
+                } else {
+                    echo 'TestNG report not found. Check Maven and TestNG configuration.'
+                }
+            }
+
+            archiveArtifacts(
+                artifacts: '**/surefire-reports/**/*,**/test-output/**/*',
+                allowEmptyArchive: true
+            )
         }
 
         success {
