@@ -150,34 +150,22 @@ stage('Clean Old Reports') {
 
         always {
 
-            // Debug: check whether files exist
-            sh '''
-                echo "=== Workspace ==="
-                pwd
+            echo '=== TestNG Report Publishing ==='
 
-                echo "=== JUnit XML reports ==="
-                find . -type f -path "*/surefire-reports/*.xml" -print
+        sh '''
+            echo "=== TestNG XML reports ==="
+            find target/surefire-reports -type f -name "*.xml" -print
+        '''
 
-                echo "=== Screenshots ==="
-                find . -type f -name "*.png" -print
-            '''
-
-            junit(
-            testResults: 'target/surefire-reports/**/*.xml',
-            allowEmptyResults: true
+        testNG(
+            reportFilenamePattern: '**/testng-results.xml',
+            showFailedBuilds: true
         )
 
         archiveArtifacts(
             artifacts: 'target/surefire-reports/**/*,test-output/**/*',
             allowEmptyArchive: true
         )
-
-        //testNG(
-        //    reportFilenamePattern: '**/testng-results.xml'
-        //)
-            echo 'Pipeline completed'
-        }
-
         success {
             echo 'Selenium tests passed'
         }
