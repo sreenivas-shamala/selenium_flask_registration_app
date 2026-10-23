@@ -1,0 +1,25 @@
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: selenium-test
+          image: sreenivasulusamala108/selenium-tests:v3
+          workingDir: /app
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set +e
+              mvn clean test
+              TEST_EXIT=$?
+
+              echo "$TEST_EXIT" > /tmp/test-exit-code
+              touch /tmp/reports-ready
+
+              echo "Reports ready. Waiting for Jenkins to copy them..."
+              while [ ! -f /tmp/reports-copied ]; do
+                sleep 2
+              done
+
+              exit "$TEST_EXIT"
