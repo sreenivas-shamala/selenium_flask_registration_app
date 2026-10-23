@@ -149,32 +149,38 @@ stage('Clean Old Reports') {
     post {
 
         always {
+                      echo '=== Searching for TestNG Reports ==='
 
-            echo '=== Workspace ==='
+            sh '''
+                echo "Workspace: $WORKSPACE"
+                find . -type f -name "testng-results.xml" -print || true
+                find . -type f -name "*.xml" -path "*/surefire-reports/*" -print || true
+            '''
 
-        sh '''
-            echo "Current directory:"
-            pwd
+            // Publish TestNG reports using the Jenkins TestNG Results plugin
+            script {
+                def reportFiles = sh(
+                    script: 'find . -type f -name "testng-results.xml" -print',
+                    returnStdout: true
+                ).trim()
 
-            echo "Workspace contents:"
-            ls -la
+                if (reportFiles) {
+                    testNG(
+                        reportFilenamePattern: '**/testng-results.xml',
+                        showFailedBuilds: true
+                    )
+                } else {
+                    echo 'WARNING: No TestNG XML report found. Check Maven test execution.'
+                }
+            }
 
-            echo "Searching for TestNG reports:"
-            find . -type f -name "testng-results.xml" -print || true
+            // Archive reports and screenshots for download
+            archiveArtifacts(
+                artifacts: '**/surefire-reports/**/*,**/test-output/**/*',
+                allowEmptyArchive: true
+            )
 
-            echo "Searching for all XML reports:"
-            find . -type f -name "*.xml" -print || true
-        ''' 
-
-          testNG(
-            reportFilenamePattern: '**/testng-results.xml',
-            showFailedBuilds: true
-        )
-
-        archiveArtifacts(
-            artifacts: '**/surefire-reports/**/*,**/test-output/**/*',
-            allowEmptyArchive: true
-        )
+ 
        } 
         success {
             echo 'Selenium tests passed'
