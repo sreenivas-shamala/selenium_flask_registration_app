@@ -22,6 +22,7 @@ public class UserRegistrationTest extends BaseTest{
         Assert.assertTrue(driver.findElement(By.name("name")).isDisplayed());
         Assert.assertTrue(driver.findElement(By.name("email")).isDisplayed());
         Assert.assertTrue(driver.findElement(By.name("password")).isDisplayed());
+        System.out.println("***********Registration Page Load Succeessfull*************");
     }
 
     @Test
@@ -39,6 +40,7 @@ public class UserRegistrationTest extends BaseTest{
         String userList = driver.findElement(By.tagName("ul")).getText();
 
         Assert.assertTrue(userList.contains("Alice - alice@example.com"));
+        System.out.println("**************Registration Successfull***************");
     }
 
     @Test
@@ -48,6 +50,7 @@ public class UserRegistrationTest extends BaseTest{
         Assert.assertTrue(name.getAttribute("required") != null);
 
         Assert.assertTrue(driver.findElement(By.name("email")).getAttribute("required") != null);
+         System.out.println("**************Empty Name validation Successfull***************");
     }
 
     @Test
@@ -55,6 +58,7 @@ public class UserRegistrationTest extends BaseTest{
         WebElement email = driver.findElement(By.name("email"));
 
         Assert.assertTrue(email.getAttribute("required") != null);
+         System.out.println("**************Empty Email validation Successfull***************");
     }
 
     @Test
@@ -62,6 +66,7 @@ public class UserRegistrationTest extends BaseTest{
         WebElement password = driver.findElement(By.name("password"));
 
         Assert.assertTrue(password.getAttribute("required") != null);
+         System.out.println("**************Empty Password validation Successfull***************");
     }
 
     @Test
@@ -79,6 +84,7 @@ public class UserRegistrationTest extends BaseTest{
         );
 
         Assert.assertTrue(invalidEmail,"Invalid email format should be rejected");
+         System.out.println("**************Invalid Email validation Successfull***************");
     }
 
     @Test
@@ -86,6 +92,7 @@ public class UserRegistrationTest extends BaseTest{
         WebElement password = driver.findElement(By.name("password"));
 
         Assert.assertEquals(password.getAttribute("type"), "password");
+         System.out.println("**************Password is Masked  Successfull***************");
     }
 
   /*  @Test
@@ -120,5 +127,6 @@ public class UserRegistrationTest extends BaseTest{
         String pageSource = driver.getPageSource();
 
         Assert.assertFalse(pageSource.contains("Secret@123"),"Password should not appear in the HTML page");
+         System.out.println("**************Password is not Displayed Successfull***************");
     }
 }
