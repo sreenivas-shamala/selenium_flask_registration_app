@@ -75,25 +75,77 @@ pipeline {
                          variable: 'KUBECONFIG')
                 ]) {
                     sh '''
-                        set -eu
+    set -eu
 
-                        echo "=== Delete previous Job ==="
-                        kubectl delete job selenium-test \
-                            -n "$K8S_NAMESPACE" \
-                            --ignore-not-found=true --wait=true
+    NS=default
+    JOB=selenium-test
 
-                        echo "=== Apply Selenium Job ==="
-                        kubectl apply \
-                            -n "$K8S_NAMESPACE" \
-                            -f selenium-jenkins-app.yaml
+    kubectl delete job "$JOB" -n "$NS" \
+        --ignore-not-found=true --wait=true
 
-                        echo "=== Wait for test completion ==="
-                        kubectl wait \
-                            -n "$K8S_NAMESPACE" \
-                            --for=condition=complete \
-                            job/selenium-test \
-                            --timeout=300s
-                    '''
+    kubectl apply -n "$NS" -f selenium-jenkins-app-report.yaml
+
+    echo "Waiting for the Selenium pod..."
+    kubectl wait -n "$NS" \
+        --for=condition=Ready pod \
+        -l job-name="$JOB" \
+        --timeout=120s
+
+    POD=$(kubectl get pods -n "$NS" \
+        -l job-name="$JOB" \
+        -o jsonpath='{.items[0].metadata.name}')
+
+    echo "Waiting for reports to be generated..."
+
+    READY=0
+    for i in $(seq 1 300); do
+        if kubectl exec -n "$NS" "$POD" \
+            -c selenium-test -- \
+            test -f /tmp/reports-ready 2>/dev/null; then
+            READY=1
+            break
+        fi
+
+        sleep 2
+    done
+
+    if [ "$READY" -ne 1 ]; then
+        echo "Reports were not generated before timeout"
+        kubectl logs -n "$NS" "$POD" || true
+        exit 1
+    fi
+
+    mkdir -p target/surefire-reports test-output
+
+    echo "Copying reports while the container is running..."
+
+    kubectl cp -n "$NS" \
+        "$POD:/app/target/surefire-reports/." \
+        target/surefire-reports/ \
+        -c selenium-test
+
+    kubectl cp -n "$NS" \
+        "$POD:/app/test-output/." \
+        test-output/ \
+        -c selenium-test || true
+
+    # Read the test exit code before allowing the container to exit.
+    TEST_EXIT=$(kubectl exec -n "$NS" "$POD" \
+        -c selenium-test -- cat /tmp/test-exit-code)
+
+    # Allow the container and Kubernetes Job to finish.
+    kubectl exec -n "$NS" "$POD" \
+        -c selenium-test -- touch /tmp/reports-copied
+
+    if [ "$TEST_EXIT" != "0" ]; then
+        echo "Selenium tests failed with exit code $TEST_EXIT"
+        exit 1
+    fi
+
+    kubectl wait -n "$NS" \
+        --for=condition=complete job/"$JOB" \
+        --timeout=120s
+'''
                 }
             }
         }
