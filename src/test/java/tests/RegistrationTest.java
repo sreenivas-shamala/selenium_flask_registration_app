@@ -18,10 +18,8 @@ public class RegistrationTest extends BaseTest {
 
         System.out.println("Page title: " + title);
 
-        Assert.assertTrue(
-                title.toLowerCase().contains("google"),
-                "Google title was not found"
-        );
+        Assert.assertTrue(title.toLowerCase().contains("google"),"Google title was not found");
+         System.out.println("**************Verify Google Title Successfull***************");
     }
 
     @Test
@@ -44,5 +42,6 @@ public class RegistrationTest extends BaseTest {
         Assert.assertTrue(result.toLowerCase().contains("registration"),
                 "Registration in Paragraph Text was not found"
         );
+         System.out.println("**************Flask Registration Successfull***************");
     }
 }
