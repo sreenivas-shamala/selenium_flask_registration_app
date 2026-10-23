@@ -146,6 +146,18 @@ pipeline {
 
         always {
 
+            // Debug: check whether files exist
+            sh '''
+                echo "=== Workspace ==="
+                pwd
+
+                echo "=== JUnit XML reports ==="
+                find . -type f -path "*/surefire-reports/*.xml" -print
+
+                echo "=== Screenshots ==="
+                find . -type f -name "*.png" -print
+            '''
+
             junit(
                 testResults: 'target/surefire-reports/TEST-*.xml',
                 allowEmptyResults: true
