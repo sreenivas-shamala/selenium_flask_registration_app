@@ -17,82 +17,51 @@ public class UserRegistrationTest extends BaseTest{
     
     @Test
     public void testRegistrationPageLoads() {
-        Assert.assertEquals(
-            driver.getTitle(), "User Registration"
-        );
+        Assert.assertEquals(driver.getTitle(), "User Registration");
 
-        Assert.assertTrue(
-            driver.findElement(By.name("name")).isDisplayed()
-        );
-        Assert.assertTrue(
-            driver.findElement(By.name("email")).isDisplayed()
-        );
-        Assert.assertTrue(
-            driver.findElement(By.name("password")).isDisplayed()
-        );
+        Assert.assertTrue(driver.findElement(By.name("name")).isDisplayed());
+        Assert.assertTrue(driver.findElement(By.name("email")).isDisplayed());
+        Assert.assertTrue(driver.findElement(By.name("password")).isDisplayed());
     }
 
     @Test
     public void testSuccessfulRegistration() {
         driver.findElement(By.name("name")).sendKeys("Alice");
-        driver.findElement(By.name("email"))
-              .sendKeys("alice@example.com");
-        driver.findElement(By.name("password"))
-              .sendKeys("Test@123");
+        driver.findElement(By.name("email")).sendKeys("alice@example.com");
+        driver.findElement(By.name("password")).sendKeys("Test@123");
 
-        driver.findElement(
-            By.cssSelector("button[type='submit']")
-        ).click();
+        driver.findElement(By.cssSelector("button[type='submit']")).click();
 
-        String message = driver.findElement(
-            By.tagName("p")
-        ).getText();
+        String message = driver.findElement(By.tagName("p")).getText();
 
-        Assert.assertEquals(
-            message, "Registration successful for Alice"
-        );
+        Assert.assertEquals(message, "Registration successful for Alice");
 
-        String userList = driver.findElement(
-            By.tagName("ul")
-        ).getText();
+        String userList = driver.findElement(By.tagName("ul")).getText();
 
-        Assert.assertTrue(
-            userList.contains("Alice - alice@example.com")
-        );
+        Assert.assertTrue(userList.contains("Alice - alice@example.com"));
     }
 
     @Test
     public void testEmptyNameValidation() {
         WebElement name = driver.findElement(By.name("name"));
 
-        Assert.assertTrue(
-            name.getAttribute("required") != null
-        );
+        Assert.assertTrue(name.getAttribute("required") != null);
 
-        Assert.assertTrue(
-            driver.findElement(By.name("email"))
-                  .getAttribute("required") != null
-        );
+        Assert.assertTrue(driver.findElement(By.name("email")).getAttribute("required") != null);
     }
 
     @Test
     public void testEmptyEmailValidation() {
         WebElement email = driver.findElement(By.name("email"));
 
-        Assert.assertTrue(
-            email.getAttribute("required") != null
-        );
+        Assert.assertTrue(email.getAttribute("required") != null);
     }
 
     @Test
     public void testEmptyPasswordValidation() {
-        WebElement password = driver.findElement(
-            By.name("password")
-        );
+        WebElement password = driver.findElement(By.name("password"));
 
-        Assert.assertTrue(
-            password.getAttribute("required") != null
-        );
+        Assert.assertTrue(password.getAttribute("required") != null);
     }
 
     @Test
@@ -109,21 +78,14 @@ public class UserRegistrationTest extends BaseTest{
                 )
         );
 
-        Assert.assertTrue(
-            invalidEmail,
-            "Invalid email format should be rejected"
-        );
+        Assert.assertTrue(invalidEmail,"Invalid email format should be rejected");
     }
 
     @Test
     public void testPasswordIsMasked() {
-        WebElement password = driver.findElement(
-            By.name("password")
-        );
+        WebElement password = driver.findElement(By.name("password"));
 
-        Assert.assertEquals(
-            password.getAttribute("type"), "password"
-        );
+        Assert.assertEquals(password.getAttribute("type"), "password");
     }
 
   /*  @Test
@@ -150,20 +112,13 @@ public class UserRegistrationTest extends BaseTest{
     @Test
     public void testPasswordIsNotDisplayed() {
         driver.findElement(By.name("name")).sendKeys("Charlie");
-        driver.findElement(By.name("email"))
-              .sendKeys("charlie@example.com");
-        driver.findElement(By.name("password"))
-              .sendKeys("Secret@123");
+        driver.findElement(By.name("email")).sendKeys("charlie@example.com");
+        driver.findElement(By.name("password")).sendKeys("Secret@123");
 
-        driver.findElement(
-            By.cssSelector("button[type='submit']")
-        ).click();
+        driver.findElement(By.cssSelector("button[type='submit']")).click();
 
         String pageSource = driver.getPageSource();
 
-        Assert.assertFalse(
-            pageSource.contains("Secret@123"),
-            "Password should not appear in the HTML page"
-        );
+        Assert.assertFalse(pageSource.contains("Secret@123"),"Password should not appear in the HTML page");
     }
 }
