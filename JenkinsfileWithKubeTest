@@ -150,20 +150,29 @@ stage('Clean Old Reports') {
 
         always {
 
-            echo '=== TestNG Report Publishing ==='
+            echo '=== Workspace ==='
 
         sh '''
-            echo "=== TestNG XML reports ==="
-            find target/surefire-reports -type f -name "*.xml" -print
-        '''
+            echo "Current directory:"
+            pwd
 
-        testNG(
+            echo "Workspace contents:"
+            ls -la
+
+            echo "Searching for TestNG reports:"
+            find . -type f -name "testng-results.xml" -print || true
+
+            echo "Searching for all XML reports:"
+            find . -type f -name "*.xml" -print || true
+        ''' 
+
+          testNG(
             reportFilenamePattern: '**/testng-results.xml',
             showFailedBuilds: true
         )
 
         archiveArtifacts(
-            artifacts: 'target/surefire-reports/**/*,test-output/**/*',
+            artifacts: '**/surefire-reports/**/*,**/test-output/**/*',
             allowEmptyArchive: true
         )
        } 
