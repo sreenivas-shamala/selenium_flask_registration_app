@@ -1,33 +1,65 @@
 package test.java.tests;
 
-import test.java.tests.BaseTest;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.openqa.selenium.By;
 
+import java.io.IOException;
+
 public class RegistrationTest extends BaseTest {
 
-    
     @Test
-    public void verifyFlaskRegistration() {
-        //String appUrl = System.getProperty("app.url","http://flask-registration-service");
+    public void verifyFlaskRegistration() throws Exception {
 
-        //driver.get(appUrl);
+        try {
+            String title = driver.getTitle();
+            System.out.println("Page title: " + title);
 
-        String title = driver.getTitle();
-        System.out.println("Page title: " + title);
-        //System.out.println("Page Url: " + appUrl);
+            driver.findElement(By.name("name"))
+                    .sendKeys("admin");
 
-        driver.findElement(By.name("name")).sendKeys("admin");
-        driver.findElement(By.name("email")).sendKeys("admin@gmail.com");
-        driver.findElement(By.name("password")).sendKeys("admin");
+            driver.findElement(By.name("email"))
+                    .sendKeys("admin@gmail.com");
 
-        driver.findElement(By.cssSelector("button[type='submit']")).click();
+            driver.findElement(By.name("password"))
+                    .sendKeys("admin");
 
-        String result = driver.findElement(By.tagName("p")).getText();
-        Assert.assertTrue(result.toLowerCase().contains("Registration"),
-                "Registration in Paragraph Text was not found"
-        );
-         System.out.println("**************Flask Registration Successfull***************");
+            driver.findElement(
+                    By.cssSelector("button[type='submit']")
+            ).click();
+
+            String result = driver.findElement(
+                    By.tagName("p")
+            ).getText();
+
+            Assert.assertTrue(
+                    result.toLowerCase().contains("registration"),
+                    "Registration in Paragraph Text was not found"
+            );
+
+            ScreenshotUtil.capture(
+                    driver, "registration-success"
+            );
+
+            System.out.println(
+                    "******** Flask Registration Successful ********"
+            );
+
+        } catch (Exception | AssertionError e) {
+
+            try {
+                ScreenshotUtil.capture(
+                        driver, "registration-failure"
+                );
+            } catch (IOException screenshotError) {
+                e.addSuppressed(screenshotError);
+                System.err.println(
+                        "Could not save screenshot: "
+                                + screenshotError.getMessage()
+                );
+            }
+
+            throw e;
+        }
     }
 }
