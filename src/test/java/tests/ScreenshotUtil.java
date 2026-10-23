@@ -23,10 +23,14 @@ public class ScreenshotUtil {
 
         Path destination = folder.resolve(name + ".png");
 
-        Files.copy(source, destination,
-                StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(
+                source.toPath(),
+                destination,
+                StandardCopyOption.REPLACE_EXISTING
+        );
 
-        System.out.println("Screenshot saved: "
-                + destination.toAbsolutePath());
+        System.out.println(
+                "Screenshot saved: " + destination.toAbsolutePath()
+        );
     }
 }
