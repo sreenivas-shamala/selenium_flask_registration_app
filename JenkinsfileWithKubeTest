@@ -159,14 +159,14 @@ pipeline {
             '''
 
             junit(
-                testResults: 'target/surefire-reports/TEST-*.xml',
-                allowEmptyResults: true
-            )
+            testResults: 'target/surefire-reports/**/*.xml',
+            allowEmptyResults: true
+        )
 
-            archiveArtifacts(
-                artifacts: 'screenshots/**/*.png',
-                allowEmptyArchive: true
-            )
+        archiveArtifacts(
+            artifacts: 'target/surefire-reports/**/*,test-output/**/*',
+            allowEmptyArchive: true
+        )
 
         //testNG(
         //    reportFilenamePattern: '**/testng-results.xml'
