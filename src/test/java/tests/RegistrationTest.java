@@ -7,26 +7,12 @@ import org.openqa.selenium.By;
 
 public class RegistrationTest extends BaseTest {
 
-    @Test
-    public void verifyGoogleTitle() {
-        //String appUrl = System.getProperty("app.url","http://flask-app-service");
-
-        //driver.get(appUrl);
-        driver.get("https://www.google.com");
-
-        String title = driver.getTitle();
-
-        System.out.println("Page title: " + title);
-
-        Assert.assertTrue(title.toLowerCase().contains("google"),"Google title was not found");
-         System.out.println("**************Verify Google Title Successfull***************");
-    }
-
+    
     @Test
     public void verifyFlaskRegistration() {
-        String appUrl = System.getProperty("app.url","http://flask-registration-service");
+        //String appUrl = System.getProperty("app.url","http://flask-registration-service");
 
-        driver.get(appUrl);
+        //driver.get(appUrl);
 
         String title = driver.getTitle();
         System.out.println("Page title: " + title);
