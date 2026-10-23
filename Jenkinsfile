@@ -33,15 +33,22 @@ pipeline {
 
         always {
 
-            junit(
-                testResults: 'target/surefire-reports/*.xml',
-                allowEmptyResults: true
-            )
+            echo '=== TestNG Report Publishing ==='
 
-            archiveArtifacts(
-                artifacts: 'screenshots/**/*.png',
-                allowEmptyArchive: true
-            )
+        sh '''
+            echo "=== TestNG XML reports ==="
+            find target/surefire-reports -type f -name "*.xml" -print
+        '''
+
+        testNG(
+            reportFilenamePattern: '**/testng-results.xml',
+            showFailedBuilds: true
+        )
+
+        archiveArtifacts(
+            artifacts: 'target/surefire-reports/**/*,test-output/**/*',
+            allowEmptyArchive: true
+        )
         }
 
         success {
