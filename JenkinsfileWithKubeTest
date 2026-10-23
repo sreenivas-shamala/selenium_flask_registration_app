@@ -84,7 +84,11 @@ pipeline {
     }
 }
              
-        
+stage('Clean Old Reports') {
+    steps {
+        sh 'rm -rf target/surefire-reports test-output'
+    }
+}        
 
  stage('Run Selenium Tests') {
             steps {
