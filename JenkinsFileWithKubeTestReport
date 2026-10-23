@@ -1,0 +1,199 @@
+
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = 'sreenivasulusamala108/selenium-tests'
+        IMAGE_TAG  = 'v3'
+        PATH       = "/usr/local/bin:${env.PATH}"
+        K8S_NAMESPACE = 'default'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/sreenivas-shamala/selenium_jenkins_integration.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh '''
+                        set -eu
+                        echo "$DOCKER_PASS" |
+                            docker login -u "$DOCKER_USER" --password-stdin
+                        docker push "$IMAGE_NAME:$IMAGE_TAG"
+                        docker logout || true
+                    '''
+                }
+            }
+        }
+
+        stage('Check kubectl') {
+            steps {
+                withCredentials([
+                    file(credentialsId: 'k8s_config',
+                         variable: 'KUBECONFIG')
+                ]) {
+                    sh '''
+                        set -e
+                        kubectl version --client
+                        kubectl cluster-info
+                        kubectl get nodes
+                    '''
+                }
+            }
+        }
+
+        stage('Clean Old Reports') {
+            steps {
+                sh '''
+                    rm -rf target/surefire-reports test-output
+                    mkdir -p target/surefire-reports test-output
+                '''
+            }
+        }
+
+        stage('Run Selenium Tests') {
+            steps {
+                withCredentials([
+                    file(credentialsId: 'k8s_config',
+                         variable: 'KUBECONFIG')
+                ]) {
+                    sh '''
+                        set -eu
+
+                        echo "=== Delete previous Job ==="
+                        kubectl delete job selenium-test \
+                            -n "$K8S_NAMESPACE" \
+                            --ignore-not-found=true --wait=true
+
+                        echo "=== Apply Selenium Job ==="
+                        kubectl apply \
+                            -n "$K8S_NAMESPACE" \
+                            -f selenium-jenkins-app.yaml
+
+                        echo "=== Wait for test completion ==="
+                        kubectl wait \
+                            -n "$K8S_NAMESPACE" \
+                            --for=condition=complete \
+                            job/selenium-test \
+                            --timeout=300s
+                    '''
+                }
+            }
+        }
+
+        stage('Selenium Test Logs') {
+            steps {
+                withCredentials([
+                    file(credentialsId: 'k8s_config',
+                         variable: 'KUBECONFIG')
+                ]) {
+                    sh '''
+                        kubectl logs \
+                            -n "$K8S_NAMESPACE" \
+                            job/selenium-test \
+                            --all-containers=true \
+                            > selenium-test.log 2>&1 || true
+
+                        cat selenium-test.log
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                withCredentials([
+                    file(credentialsId: 'k8s_config',
+                         variable: 'KUBECONFIG')
+                ]) {
+                    sh '''
+                        set +e
+
+                        echo "=== Locate Selenium pod ==="
+
+                        POD=$(kubectl get pods \
+                            -n "$K8S_NAMESPACE" \
+                            -l job-name=selenium-test \
+                            -o jsonpath='{.items[0].metadata.name}' \
+                            2>/dev/null)
+
+                        if [ -z "$POD" ]; then
+                            echo "No Selenium pod found"
+                            exit 0
+                        fi
+
+                        echo "Pod: $POD"
+
+                        echo "=== Collect TestNG reports ==="
+
+                        # Update /app to the actual project directory
+                        # inside your Selenium container.
+                        kubectl cp \
+                            "$K8S_NAMESPACE/$POD:/app/target/surefire-reports/." \
+                            target/surefire-reports/ \
+                            -c "$(kubectl get pod "$POD" \
+                                -n "$K8S_NAMESPACE" \
+                                -o jsonpath='{.spec.containers[0].name}')" \
+                            || echo "Could not copy Surefire reports"
+
+                        kubectl cp \
+                            "$K8S_NAMESPACE/$POD:/app/test-output/." \
+                            test-output/ \
+                            -c "$(kubectl get pod "$POD" \
+                                -n "$K8S_NAMESPACE" \
+                                -o jsonpath='{.spec.containers[0].name}')" \
+                            || echo "Could not copy TestNG output"
+
+                        echo "=== XML files in Jenkins workspace ==="
+                        find . -type f -name "*.xml" -print
+
+                        echo "=== Screenshots in Jenkins workspace ==="
+                        find . -type f -name "*.png" -print
+                    '''
+                }
+
+                if (fileExists('target/surefire-reports/testng-results.xml')) {
+                    testNG(
+                        reportFilenamePattern:
+                            '**/testng-results.xml',
+                        showFailedBuilds: true
+                    )
+                } else {
+                    echo 'TestNG XML is missing from the Jenkins workspace.'
+                }
+
+                archiveArtifacts(
+                    artifacts: '**/surefire-reports/**/*,**/test-output/**/*,selenium-test.log',
+                    allowEmptyArchive: true
+                )
+            }
+        }
+
+        success {
+            echo 'Selenium tests passed'
+        }
+
+        failure {
+            echo 'Selenium tests failed; checking published reports and logs'
+        }
+    }
+}
