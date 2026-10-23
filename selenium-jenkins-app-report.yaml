@@ -1,25 +1,49 @@
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: selenium-test
 spec:
   backoffLimit: 0
+
   template:
+    metadata:
+      labels:
+        app: selenium-test
+
     spec:
       restartPolicy: Never
+
       containers:
         - name: selenium-test
           image: sreenivasulusamala108/selenium-tests:v3
+          imagePullPolicy: Always
+
           workingDir: /app
-          command: ["/bin/sh", "-c"]
+
+          command:
+            - /bin/sh
+            - -c
+
           args:
             - |
-              set +e
-              mvn clean test
+              echo "=== Running Selenium TestNG tests ==="
+
+              mvn clean test -Dapp.url=http://flask-registration-service
               TEST_EXIT=$?
 
               echo "$TEST_EXIT" > /tmp/test-exit-code
               touch /tmp/reports-ready
 
-              echo "Reports ready. Waiting for Jenkins to copy them..."
+              echo "=== Reports generated ==="
+              find /app/target/surefire-reports -type f -print 2>/dev/null || true
+              find /app/test-output -type f -print 2>/dev/null || true
+
+              echo "Waiting for Jenkins to collect reports..."
+
               while [ ! -f /tmp/reports-copied ]; do
                 sleep 2
               done
 
+              echo "Reports copied. Exiting with code $TEST_EXIT"
               exit "$TEST_EXIT"
