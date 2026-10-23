@@ -29,40 +29,40 @@ pipeline {
     }
 
     post {
-        always {
-            echo '=== TestNG Report Publishing ==='
+       always {
+    echo '=== TestNG Report Publishing ==='
 
-            sh '''
-                echo "=== Workspace ==="
-                pwd
+    sh '''
+        echo "=== Workspace ==="
+        pwd
 
-                echo "=== TestNG XML reports ==="
-                find . -type f -name "testng-results.xml" -print || true
+        echo "=== TestNG XML reports ==="
+        find . -type f -name "testng-results.xml" -print || true
 
-                echo "=== Surefire XML reports ==="
-                find . -type f -path "*/surefire-reports/*.xml" -print || true
+        echo "=== Surefire XML reports ==="
+        find . -type f -path "*/surefire-reports/*.xml" -print || true
 
-                echo "=== Screenshots ==="
-                find . -type f -name "*.png" -print || true
-            '''
+        echo "=== Screenshots ==="
+        find . -type f \\( -iname "*.png" -o -iname "*.jpg" \\) -print || true
+    '''
 
-            script {
-                if (fileExists('target/surefire-reports/testng-results.xml')) {
-                    testNG(
-                        reportFilenamePattern:
-                            '**/testng-results.xml',
-                        showFailedBuilds: true
-                    )
-                } else {
-                    echo 'TestNG report not found. Check Maven and TestNG configuration.'
-                }
-            }
-
-            archiveArtifacts(
-                artifacts: '**/surefire-reports/**/*,**/test-output/**/*',
-                allowEmptyArchive: true
+    script {
+        if (fileExists('target/surefire-reports/testng-results.xml')) {
+            testNG(
+                reportFilenamePattern: '**/testng-results.xml',
+                showFailedBuilds: true
             )
+        } else {
+            echo 'TestNG report not found. Check Maven and TestNG configuration.'
         }
+    }
+
+    // Archive reports and screenshots
+    archiveArtifacts(
+        artifacts: '**/surefire-reports/**/*,**/test-output/**/*,**/screenshots/**/*.png,**/screenshots/**/*.jpg,screenshots/**/*.png,screenshots/**/*.jpg',
+        allowEmptyArchive: true
+    )
+}
 
         success {
             echo 'Selenium test execution completed successfully.'
